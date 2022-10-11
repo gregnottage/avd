@@ -79,6 +79,7 @@ Invoke-WebRequest -Uri $FSLogixURI -OutFile "$LocalWVDpath$FSInstaller"
 #    Prep for WVD Install    #
 ##############################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Unzip FSLogix"
+Write-Host "Unzip FSLogix"
 Expand-Archive `
     -LiteralPath "C:\temp\wvd\$FSInstaller" `
     -DestinationPath "$LocalWVDpath\FSLogix" `
@@ -88,22 +89,31 @@ Expand-Archive `
 cd $LocalWVDpath
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "UnZip FXLogix Complete"
 
+Write-Host "Check for file: $LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe"
+While (-Not(Test-Path -Path "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe")) {
+    Start-Sleep -Seconds 5
+    Write-Host "Waiting for file extraction..."
+}
+
+Write-Host "File exists"
+Start-Sleep -Seconds 5
 
 #########################
 #    FSLogix Install    #
 #########################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
+Write-Host "Installing FSLogix"
 $fslogix_deploy_status = Start-Process `
     -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
     -ArgumentList "/install /quiet" `
     -Wait `
     -Passthru
 
-
 #######################################
 #    FSLogix User Profile Settings    #
 #######################################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Configure FSLogix Profile Settings"
+Write-Host "Configure FSLogix registry settings"
 Push-Location
 Set-Location HKLM:\SOFTWARE\
 New-Item `
@@ -163,6 +173,7 @@ Set-ItemProperty `
     -Value 1
 Pop-Location
 
+Exit 0
 
 #############
 #    END    #
