@@ -103,11 +103,16 @@ Start-Sleep -Seconds 5
 #########################
 Add-Content -LiteralPath C:\New-WVDSessionHost.log "Installing FSLogix"
 Write-Host "Installing FSLogix"
-$fslogix_deploy_status = Start-Process `
-    -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" `
-    -ArgumentList "/install /quiet" `
-    -Wait `
-    -Passthru
+
+Try {
+    $fslogix_deploy_status = Start-Process -FilePath "$LocalWVDpath\FSLogix\x64\Release\FSLogixAppsSetup.exe" -ArgumentList "/install /quiet" -Wait -Passthru
+    Write-Host "$fslogix_deploy_status"
+}
+Catch {
+    Write-Error
+    Write-Host "Error occurred installing FSLogix!"
+    Exit 0
+}
 
 #######################################
 #    FSLogix User Profile Settings    #
